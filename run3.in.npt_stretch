@@ -1,0 +1,47 @@
+variable j index 0 100000 200000 300000 400000 500000 600000 700000 800000 900000 1000000
+#variable j equal 0
+variable i equal 2
+
+
+#文件夹，读取
+shell mkdir ${i}_${j}
+shell cp ${i}/if_ion_bond2.m ${i}_${j}/if_ion_bond2.m
+shell cp ${i}/ion_bond_analyse.m ${i}_${j}/ion_bond_analyse.m
+shell cp ${i}/mystat3.m ${i}_${j}/mystat3.m
+shell cp ${i}/read_atom_info.m ${i}_${j}/read_atom_info.m
+shell cp ${i}/read_current_info.m ${i}_${j}/read_current_info.m
+read_restart ${i}/restart.equil.${j}
+
+
+#计算应变和应变率
+variable sigmaxx equal "-pxx"
+variable sigmayy equal "-pyy"
+variable sigmazz equal "-pzz"
+variable tmp equal "lx"
+variable L0 equal ${tmp}
+variable cut equal 1.8*v_L0
+variable strain equal "(lx-v_L0)/v_L0"
+variable stress equal "v_sigmaxx - (v_sigmayy + v_sigmazz)/2"
+
+variable MyEpsilon equal 0.001*v_i
+variable Speed equal v_MyEpsilon*v_L0
+variable RunStep equal 6000/v_MyEpsilon
+
+variable T equal 1.0
+variable P equal 0.1
+
+
+#计算和输出
+dump 1 all custom 1 ${i}_${j}/dump.xyz.* id mol type q x y z
+fix stress_output  all ave/time 1 1 1 v_strain v_stress file ${i}_${j}/d_ave_${i}.txt
+
+
+
+#拉伸
+fix 1 all npt temp ${T} ${T} 0.5 y ${P} ${P} 5.0 z ${P} ${P} 5.0 couple yz
+fix 2 all deform 1 x vel ${Speed} remap x
+run 1000 
+
+clear
+next j
+jump run3.in.npt_stretch 
