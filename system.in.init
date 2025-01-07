@@ -1,0 +1,12 @@
+		units	lj
+		atom_style	full
+		boundary		p p p
+		bond_style	harmonic
+		#neighbor	0.3	bin
+		neigh_modify	every 1 delay 0 check yes one 10000
+		pair_style	lj/cut/coul/cut	2.5   0.1
+		pair_modify	shift	yes	mix	geometric
+		#kspace_style	pppm	1.0e-4
+		special_bonds	lj/coul 0.0 1.0 1.0
+		#dielectric 		0.116
+		dielectric 		1.0
